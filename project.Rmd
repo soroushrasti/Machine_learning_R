@@ -1,0 +1,75 @@
+---
+title: "Final Project for Pratical Machine learning"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Soroush Rasti
+##### March 2020
+
+At first, the neceeary libraries and the input data are imported:
+
+```{r 1}
+library(caret)
+data<-read.csv('pml-training.csv')
+testing_final<-read.csv('pml-testing.csv')
+```
+
+After that, the data are cleaned and the coloums with 'NAN' values are deleted:
+
+```{r 2}
+data <- data[,colSums(is.na(data))==0]
+testing_final <- testing_final[,colSums(is.na(testing_final))==0]
+```
+It seems that the first six coloums are also needed to removed since they only have dates and times information which is not usefull for the modeling of this work.
+
+```{r 3}
+data <- data[,-c(1:6)]
+testing_final <- testing_final[,-c(1:6)]
+```
+
+Finnaly the cleaned data seems like this:
+
+```{r 3-1}
+str(data[,1:10])
+```
+
+Since the cross validation analysis shoule be done withing the testing_final dataset, another testing data for measuring accuracy is derived by caret package based on the distrubution of Class varibale:
+
+```{r 4}
+tr <- createDataPartition(y=data$classe, p=0.7, list=FALSE )
+training <- data[tr,]
+testing <- data[-tr,]
+```
+
+In below, the training data is used for modeling through RANDOM FOREST method. Afterwards, the prediction and accuracy are calculated according to the testing data.
+
+```{r 5 ,eval=F, echo=T}
+model <- train( classe~ ., data=training, method='rf')
+initial_prediction <- predict(model, testing)
+confusionMatrix(initial_prediction, testing$classe)
+```
+
+The accuracy is  0.90 . The same model predicts the 20 cases of the testing_final as below: 
+
+
+```{r 6,eval=F, echo=T}
+predict(model, testing_final)
+```
+
+
+Here, another model, 'gbm' is used to calculate the accuracy and do prediction:
+```{r 7,eval=F, echo=T}
+model <- train( classe~ ., data=training, method='gbm')
+initial_prediction <- predict(model, testing)
+confusionMatrix(initial_prediction, testing$classe)
+```
+
+So, the accuracy is  0.89 . The same model predicts the 20 cases of the testing_final as below: 
+
+
+```{r 8,eval=F, echo=T}
+predict(model, testing_final)
+```
